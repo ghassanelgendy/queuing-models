@@ -76,3 +76,9 @@ class MMInf(QueueModel):
         """Calculate and return the variance of the number of customers in the system."""
         # For Poisson distribution, variance equals mean
         return self.average_customers_in_system() 
+        
+    def probability_all_servers_busy(self):
+        """Calculate and return the probability that all servers are busy (Pw)."""
+        # For M/M/∞, this is 0 since there are infinite servers
+        # so there's always a free server
+        return 0 

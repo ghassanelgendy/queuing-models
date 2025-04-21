@@ -7,22 +7,24 @@ from mminf import MMInf
 def print_model_results(model, model_name):
     """Print the results for a queueing model."""
     print(f"\n{model_name} Model Results:")
-    print(f"Utilization factor: {model.rho:.4f}")
-    print(f"Probability of system being idle: {model.probability_idle():.4f}")
-    print(f"Average number of customers in the system: {model.average_customers_in_system():.4f}")
-    print(f"Average number of customers in the queue: {model.average_customers_in_queue():.4f}")
-    print(f"Average time in the system: {model.average_time_in_system():.4f}")
-    print(f"Average time in the queue: {model.average_time_in_queue():.4f}")
+    print(f"P0 - Probability that system is idle: {model.probability_idle():.4f}")
     
     # Print probability distribution for a few values
-    print("\nProbability of n customers in the system:")
+    print("Pn - Probability of n customers in the system:")
     for n in range(5):
         print(f"P({n}) = {model.probability_n_customers(n):.4f}")
+        
+    print(f"L - Average number of customers in the system: {model.average_customers_in_system():.4f}")
+    print(f"Lq - Average number of customers in the queue: {model.average_customers_in_queue():.4f}")
+    print(f"W - Average time spent in the system: {model.average_time_in_system():.4f}")
+    print(f"Wq - Average time spent in the queue: {model.average_time_in_queue():.4f}")
+    print(f"Pw - Probability that all servers are busy: {model.probability_all_servers_busy():.4f}")
+    print(f"p - Utilization factor of each server: {model.rho:.4f}")
 
 def main():
     # Parameters
-    arrival_rate = 5      # 5 customers per hour
-    service_rate = 8      # 8 customers served per hour
+    arrival_rate = float(input("Enter the arrival rate (cx per hour): "))  
+    service_rate = float(input("Enter the service rate (cx per hour): "))       # 8 customers served per hour
     
     print("Queuing Models Example")
     print("======================")
@@ -54,7 +56,6 @@ def main():
     try:
         mmk_model = MMk(arrival_rate * 2, service_rate, num_servers)  # Increased arrival rate for illustration
         print_model_results(mmk_model, f"M/M/{num_servers}")
-        print(f"Erlang C (probability all servers busy): {mmk_model.erlang_c():.4f}")
     except ValueError as e:
         print(f"\nM/M/{num_servers} Model: {e}")
     

@@ -54,3 +54,8 @@ class QueueModel(ABC):
             n (int): Number of customers
         """
         pass
+        
+    @abstractmethod
+    def probability_all_servers_busy(self):
+        """Calculate and return the probability that all servers are busy (Pw)."""
+        pass

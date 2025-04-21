@@ -99,4 +99,9 @@ class MMk(QueueModel):
     
     def average_time_in_system(self):
         """Calculate and return the average time spent in the system (W)."""
-        return self.average_time_in_queue() + (1 / self.service_rate) 
+        return self.average_time_in_queue() + (1 / self.service_rate)
+    
+    def probability_all_servers_busy(self):
+        """Calculate and return the probability that all servers are busy (Pw)."""
+        # For M/M/k, this is the Erlang C formula
+        return self.erlang_c() 

@@ -79,3 +79,8 @@ class MM1K(QueueModel):
     def average_time_in_queue(self):
         """Calculate and return the average time spent in the queue (Wq)."""
         return self.average_customers_in_queue() / self.effective_arrival_rate() 
+        
+    def probability_all_servers_busy(self):
+        """Calculate and return the probability that all servers are busy (Pw)."""
+        # For M/M/1/K, this is 1 - P0 since there's only one server
+        return 1 - self.probability_idle() 
