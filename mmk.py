@@ -24,13 +24,10 @@ class MMk(QueueModel):
         
         super().__init__(arrival_rate, service_rate)
         
-        # For M/M/k, we use a different definition of utilization
         self.rho = self.arrival_rate / (self.num_servers * self.service_rate)
         
         # Validate stability condition
-        if self.rho >= 1:
-            raise ValueError("System is unstable: arrival rate must be less than total service rate")
-    
+      
     def calculate_utilization(self):
         """Calculate and return the utilization factor (rho)."""
         if hasattr(self, 'num_servers'):
@@ -38,32 +35,11 @@ class MMk(QueueModel):
         else:
             return self.arrival_rate / self.service_rate
     
-    def erlang_c(self):
-        """Calculate and return the Erlang C formula (probability all servers are busy)."""
-        a = self.arrival_rate / self.service_rate
-        k = self.num_servers
-        
-        # Calculate the sum term in the denominator
-        sum_term = 0
-        for n in range(k):
-            sum_term += (a**n) / math.factorial(n)
-        
-        # Calculate the Erlang C formula
-        numerator = (a**k) / math.factorial(k)
-        denominator = numerator * (1 / (1 - self.rho)) + sum_term
-        
-        return numerator / denominator
-    
     def probability_idle(self):
         """Calculate and return the probability that the system is idle (P0)."""
-        a = self.arrival_rate / self.service_rate
-        k = self.num_servers
-        
-        sum_term = 0
-        for n in range(k):
-            sum_term += (a**n) / math.factorial(n)
-            
-        return 1 / (sum_term + (a**k) / (math.factorial(k) * (1 - self.rho)))
+        sum_terms = sum((self.arrival_rate/self.service_rate)**n / math.factorial(n) for n in range(self.num_servers))
+        last_term = (self.arrival_rate/self.service_rate)**self.num_servers / (math.factorial(self.num_servers) * (1 - self.rho))
+        return 1.0 / (sum_terms + last_term)
     
     def probability_n_customers(self, n):
         """
@@ -86,22 +62,44 @@ class MMk(QueueModel):
     
     def average_customers_in_queue(self):
         """Calculate and return the average number of customers in the queue (Lq)."""
-        a = self.arrival_rate / self.service_rate
-        return self.erlang_c() * a * self.rho / (1 - self.rho)
+        lamda = self.arrival_rate
+        mu = self.service_rate
+        k = self.num_servers
+        p0 = self.probability_idle()
+        
+        return ((lamda/mu)**k * lamda * mu) / (math.factorial(k-1) * (k*mu - lamda)**2) * p0
     
     def average_customers_in_system(self):
         """Calculate and return the average number of customers in the system (L)."""
-        return self.average_customers_in_queue() + (self.arrival_rate / self.service_rate)
+        lamda = self.arrival_rate
+        mu = self.service_rate
+        k = self.num_servers
+        p0 = self.probability_idle()
+        
+        return ((lamda/mu)**k * lamda * mu) / (math.factorial(k-1) * (k*mu - lamda)**2) * p0 + lamda/mu
     
     def average_time_in_queue(self):
         """Calculate and return the average time spent in the queue (Wq)."""
-        return self.average_customers_in_queue() / self.arrival_rate
+        lamda = self.arrival_rate
+        mu = self.service_rate
+        k = self.num_servers
+        p0 = self.probability_idle()
+        
+        return ((lamda/mu)**k * mu) / (math.factorial(k-1) * (k*mu - lamda)**2) * p0
     
     def average_time_in_system(self):
         """Calculate and return the average time spent in the system (W)."""
-        return self.average_time_in_queue() + (1 / self.service_rate)
+        lamda = self.arrival_rate
+        mu = self.service_rate
+        k = self.num_servers
+        p0 = self.probability_idle()
+        
+        return ((lamda/mu)**k * mu) / (math.factorial(k-1) * (k*mu - lamda)**2) * p0 + 1/mu
     
     def probability_all_servers_busy(self):
         """Calculate and return the probability that all servers are busy (Pw)."""
-        # For M/M/k, this is the Erlang C formula
-        return self.erlang_c() 
+        k = self.num_servers
+        p0 = self.probability_idle()
+        
+        return (1/math.factorial(k)) * (self.arrival_rate/self.service_rate)**k * (k*self.service_rate/(k*self.service_rate - self.arrival_rate)) * p0
+        

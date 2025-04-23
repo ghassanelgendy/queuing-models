@@ -20,9 +20,8 @@ class MM1(QueueModel):
         super().__init__(arrival_rate, service_rate)
         # Validate stability condition
         if self.rho >= 1:
-            print("System is unstable: arrival rate must be less than service rate")
-            return 2
-            
+            # return 2
+            raise ValueError("System is unstable: arrival rate must be less than service rate")
     def probability_idle(self):
         """Calculate and return the probability that the system is idle (P0)."""
         return 1 - self.rho

@@ -1,0 +1,83 @@
+#bonus (Phase II)
+import random
+
+def exponential(rate):
+    return random.expovariate(rate)
+
+def mm1_simulation(lambda_, mu, num_customers):
+    current_time = 0
+    queue = []
+    next_arrival = exponential(lambda_)
+    next_departure = float('inf')
+
+    total_wait_time = 0
+    total_system_time = 0
+    total_idle_time = 0
+    last_event_time = 0
+
+    num_in_queue = 0
+    num_departed = 0
+
+    server_busy = False
+
+    arrival_times = []
+
+    while num_departed < num_customers:
+        if next_arrival < next_departure:
+            current_time = next_arrival
+            if not server_busy:
+                server_busy = True
+                service_time = exponential(mu)
+                next_departure = current_time + service_time
+                total_idle_time += current_time - last_event_time
+                total_system_time += service_time
+            else:
+                queue.append(current_time)
+                num_in_queue += 1
+            next_arrival = current_time + exponential(lambda_)
+        else:
+            current_time = next_departure
+            num_departed += 1
+
+            if queue:
+                arrival_time = queue.pop(0)
+                wait_time = current_time - arrival_time
+                service_time = exponential(mu)
+                total_wait_time += wait_time
+                total_system_time += wait_time + service_time
+                next_departure = current_time + service_time
+                num_in_queue -= 1
+            else:
+                server_busy = False
+                next_departure = float('inf')
+                last_event_time = current_time
+
+    W = total_system_time / num_customers
+    Wq = total_wait_time / num_customers
+    L = lambda_ * W
+    Lq = lambda_ * Wq
+    P0 = total_idle_time / current_time
+    Pw = 1 - P0
+    rho = lambda_ / mu
+
+    return {
+        "Simulated W (avg time in system)": W,
+        "Simulated Wq (avg time in queue)": Wq,
+        "Simulated L (avg number in system)": L,
+        "Simulated Lq (avg number in queue)": Lq,
+        "Simulated P0 (idle probability)": P0,
+        "Simulated Pw (server busy)": Pw,
+        "Theoretical W": 1 / (mu - lambda_),
+        "Theoretical Wq": lambda_ / (mu * (mu - lambda_)),
+        "Theoretical L": lambda_ / (mu - lambda_),
+        "Theoretical Lq": (lambda_**2) / (mu * (mu - lambda_)),
+        "Theoretical P0": 1 - (lambda_ / mu),
+        "Theoretical Pw": lambda_ / mu,
+        "Utilization ρ": rho
+    }
+
+# Example usage
+random.seed(42)  # For reproducibility
+results = mm1_simulation(lambda_=5, mu=7.5, num_customers=1000000)
+for k, v in results.items():
+    print(f"{k}: {v:.4f}")
