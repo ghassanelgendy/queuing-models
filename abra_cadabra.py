@@ -82,40 +82,46 @@ def print_dict(d):
         if isinstance(v, list):
             print(f"{k}:")
             for i, val in enumerate(v):
-                print(f"  {i}: {val:.6f}")
+                print(f"  {i}: {val:.3f}")
         else:
-            print(f"{k} = {v:.6f}")
+            print(f"{k} = {v:.3f}")
     print()
 
 def main():
     print("\nQueueing System Analysis Tool")
     print("-" * 30)
     
-    # Get basic parameters
+    # input paramaeters mn eluser
     arrival_rate = float(input("Arrival rate (customers/hour): "))
     service_rate = float(input("Service rate (customers/hour): "))
     servers = int(input("Number of servers (1 or more): "))
     capacity = int(input("System capacity (0 for infinite): "))
     population = int(input("Population size (0 for infinite): "))
-    
+    discipline = input("System discipline (e.g., FIFO, LIFO, SIRO): ")
+
     try:
-        # Determine which model to use and calculate results
+        # No3 elqueue lw elpopulation infinity 
         if population > 0:
             res = mm1m(arrival_rate, service_rate, population)
             print("\nM/M/1/m (finite source) results:")
+        # lw capacity finite
         elif capacity > 0:
             res = mm1k(arrival_rate, service_rate, capacity)
             print(f"\nM/M/1/{capacity} results:")
+        # multiserver (aktar mn wahed)
         elif servers > 1:
             if servers == int(99):
                 res = mminf(arrival_rate, service_rate, 5)  # Show first 5 probabilities
                 print("\nM/M/∞ results:")
+            #lw kolhom yebaa mmk 
             else:
                 res = mmk(arrival_rate, service_rate, servers)
                 print(f"\nM/M/{servers} results:")
+            #lw 1 server w 1 queue
         else:
             res = mm1(arrival_rate, service_rate)
             print("\nM/M/1 results:")
+        print(f"System discipline: {discipline}")
             
         print_dict(res)
         
